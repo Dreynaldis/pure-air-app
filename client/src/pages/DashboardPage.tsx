@@ -11,6 +11,8 @@ import {
  } from "chart.js"
 import { Bar } from "react-chartjs-2"
 import { getTingkat } from "../utils/tools"
+import Modal from "../component/Modal"
+import { handleToastError, handleToastSuccess } from "../utils/toast"
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -25,8 +27,22 @@ interface ChartData {
     }[]
 }
 
+interface QualityData {
+    id: number
+    daerah: string
+    value: number
+    tingkat: string
+}
+
+
 const DashboardPage = () => {
+
     const [barChartData, setBarChartData] = useState<ChartData | null>(null)
+    const [showModal, setShowModal] = useState(false)
+    const [modalType, setModalType] = useState<"create" | "edit" | "delete">("create")
+    const [qualityData, setQualityData] = useState<QualityData[]>([])
+    const [selectedId, setSelectedId] = useState<number | null>(null)
+    const [currentEditData, setCurrentEditData] = useState<any |null>(null)
 
     useEffect(() => {
         fetchData()
@@ -47,12 +63,18 @@ const DashboardPage = () => {
                     getTingkat(value) === 'Sedang' ? sedangColor :
                         tinggiColor
             }
-            console.log(data);
             
             //assign chart labels and data
             const labels = data.map ((item: {daerah:string}) => item.daerah)
             const values = data.map ((item: {value:string}) => item.value)
+            const qualityDataList: QualityData[] = data.map((item: any) => ({
+                id: item.id,
+                daerah: item.daerah,
+                value: item.value,
+                tingkat: item.tingkat
+            }))
 
+            setQualityData(qualityDataList)
             setBarChartData({
                 labels,
                 datasets: [
@@ -65,51 +87,191 @@ const DashboardPage = () => {
                     }
                 ]
             })
+            
         } catch (error) {
             console.error('Error Fetching Data', error);          
         }
     }
     
+    const checkExistingDaerah = (daerah: string) => {
+        if (barChartData) {
+            return barChartData.labels.some((item) => {
+              return  item.toLowerCase() === daerah.toLowerCase()
+            })
+        } return false
+    }
+
     const options = {
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 beginAtZero: true,
-                max: 10
+                max: 10,
+                ticks: {
+                    stepSize: 1
+                }
             }
         },
-        responsive: true,
         plugins: {
-            legend: {
-                position: 'top' as const
-            },
-            title: {
-                display: true,
-                text: 'Air Quality Levels by Region'
-            }
+            
         },
-        maxBarThickness: 100,
+        maxBarThickness: 60,
         minBarThickness: 10
+    }
+    const closeModal = () => {
+        setShowModal(false)
+    }
+
+    const handleOpenModal = (type: "create" | "edit" | "delete", item: QualityData) => {
+        setModalType(type)
+        setShowModal(true)
+
+        if (item) {
+            setSelectedId(item.id)
+            setCurrentEditData(item)
+        } else {
+            setSelectedId(null)
+            setCurrentEditData(null)
+        }
+        
+    }
+
+    const handleCreateSubmit = async (newData: { daerah: string, value: number, tingkat: string }) => {
+        if (checkExistingDaerah(newData.daerah)) {
+            handleToastError('Daerah already exists!')
+        } else {
+            try {
+                await axios.post(`${import.meta.env.VITE_API_BASE_URL}/quality/create`, {
+                    daerah: newData.daerah,
+                    value: newData.value,
+                    tingkat: newData.tingkat
+                })
+    
+                fetchData()
+                handleToastSuccess('Created new data Sucess!!')
+                setShowModal(false)
+            } catch (error) {
+                console.error('Error posting data', error)
+                handleToastError('Something went wrong, please try again later')
+            }
+        }
+
+    }
+
+    const handleEditSubmit = async (updatedData: {daerah: string, values: number}) => {
+        try {
+            await axios.put(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`, updatedData)
+            setSelectedId(null)
+            setCurrentEditData(null)
+            fetchData()
+            setShowModal(false)
+            handleToastSuccess('Data updated successfully')
+        } catch (error) {
+            console.error(`Error updating data: ${selectedId}`, error)
+            handleToastError('Failed to update data, please try again')
+        }
+    }
+
+    const handleDelete = async () => {
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`)
+            fetchData()
+            setShowModal(false)
+            handleToastSuccess("Data deleted Successfully")
+        } catch (error) {
+            console.error("Error Deleting data", error)
+            handleToastError('Failed to delete data, please try again')
+        }
     }
 
   return (
-      <div>
-          <h1 className="text-2xl">Dashboard page</h1>
-          <div className="flex mt-5 flex-col border-2 rounded-lg p-6">
-              <h2>Value by Daerah</h2>
-              {barChartData ? <Bar data={barChartData} options={options}/> : <p>Loading data ...</p>}
-              <div className="flex-col justify-between h-20 flex ">
-                  <div className="flex bg-[#4bc0c0] w-6 h-5 border-2">
-                      <span className="ml-10">Rendah</span>
-                  </div>
-                  <div className="flex bg-[#ffce56] w-6 h-5">
-                      <span className="ml-10">Sedang</span>
-                  </div>
-                  <div className="flex bg-[#ff6384] w-6 h-5">
-                      <span className="ml-10">Tinggi</span>
-                  </div>
-              </div>
+    <div className="flex flex-col items-center w-full">
+        <div className="w-full md:w-3/4 lg:w-2/3 xl:w-1/2 flex flex-col items-center">
+            <h1 className="text-3xl text-center">Dashboard Page</h1>
+            <div className="flex mt-5 flex-col border-2 rounded-lg p-6 w-[600px]">
+                <h2 className="text-xl text-center mb-4">Value by Daerah</h2>
+                {barChartData ? (
+                    <div className="mx-auto">
+                        <Bar data={barChartData} options={options} />
+                    </div>
+                ) : (
+                    <p>Loading data ...</p>
+                )}
+                <div className="mt-10">
+                    <div className="flex flex-col justify-start mb-2">
+                        <div className="flex bg-[#4bc0c0] w-6 h-5 border-2">
+                            <span className="ml-8 text-sm">Rendah</span>
+                        </div>
+                        <div className="flex bg-[#ffce56] w-6 h-5 border-2">
+                            <span className="ml-8 text-sm">Sedang</span>
+                        </div>
+                        <div className="flex bg-[#ff6384] w-6 h-5 border-2">
+                            <span className="ml-8 text-sm">Tinggi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
           </div>
-      </div>
+          <div className="container mx-auto p-6">
+      {/* Button to open modal */}
+      <button
+        onClick={() => handleOpenModal("create")}
+        className="bg-blue-700 text-white px-5 py-2.5 rounded-lg"
+      >
+        Add New Data
+      </button>
+              <Modal
+                  modalType={modalType}
+                  isOpen={showModal}
+                  onClose={closeModal}
+                  onSubmit={modalType === "create"? handleCreateSubmit : modalType === "edit" ? handleEditSubmit : handleDelete}
+                  initialData={modalType !== "create" && currentEditData}
+              />
+      
+          </div>
+          {qualityData.length>0 ? (
+              <div className="mt-6 w-4/5 border rounded-lg p-4 bg-g1">
+              <h2 className="text-xl mb-4">Data List</h2>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="border p-2">ID</th>
+                    <th className="border p-2">Daerah</th>
+                    <th className="border p-2">Value</th>
+                    <th className="border p-2">Tingkat</th>
+                    <th className="border p-2">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                          {qualityData.map((item) => (
+                        <tr key={item.id} className="text-center">
+                          <td className="border p-2">{item.id}</td>
+                          <td className="border p-2">{item.daerah}</td>
+                          <td className="border p-2">{item.value}</td>
+                          <td className="border p-2">{item.tingkat}</td>
+                          <td className="border p-2 space-x-2">
+                            <button
+                              onClick={() => handleOpenModal("edit", item)}
+                              className="bg-blue-500 text-white px-3 py-1 rounded"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleOpenModal("delete", item)}
+                              className="bg-red-500 text-white px-3 py-1 rounded"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+
+                  ) )}
+                </tbody>
+              </table>
+            </div>
+        ): null }  
+</div>
   )
 }
 

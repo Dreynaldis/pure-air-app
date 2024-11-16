@@ -18,13 +18,13 @@ const LoginPage = () => {
     const onLogin = async (values: { email: string, password: string }) => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login`, values)
-            console.log(response.data);
+
             
             if (response.data.status !== 'SUCCESS') {
                 handleToastError('Login Failed, Please try again!')
             } else {
-                Cookies.set('token', response.data.token, {expires: 1})
-                Cookies.set('username', response.data.token)
+                Cookies.set('token', response.data.data[0].token, {expires: 1})
+                Cookies.set('username', response.data.data[0].name)
                 handleToastSuccess('Login Successfull')
                 
                 navigate('/dashboard')
