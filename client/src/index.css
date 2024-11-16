@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base{
+  html {
+    @apply bg-s1
+  }
+  body {
+    @apply font-inter text-p5
+  }
+  a {
+    @apply no-underline;
+  }
+
+  img {
+    @apply block max-w-full;
+  }
+}
+
+@layer utilities{
+  .g1 {
+    background: linear-gradient(#334679, #0c1838);
+  }
+}
