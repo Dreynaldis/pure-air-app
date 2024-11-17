@@ -87,7 +87,6 @@ const Navbar = () => {
                   >
                     Login
                       </Link>
-                      <button onClick={() => setIsLoggedIn(true)}>asd</button>
                 </span>
               )}
             </div>
