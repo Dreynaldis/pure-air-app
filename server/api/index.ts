@@ -2,8 +2,8 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-import router from './routes';
-import sequelize from './db/config';
+import router from '../src/routes';
+import sequelize from '../src/db/config';
 
 require('dotenv').config()
 
