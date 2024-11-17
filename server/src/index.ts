@@ -23,8 +23,10 @@ try {
   console.error('Unable to connect to the database:', error);
 }
 
+app.get('/', (req, res) => res.send("Express on Vercel"))
+
 const port = process.env.PORT || 3000;
 app.listen(port);
 console.log(`${process.env.APP_NAME} running on port ${port}`);
 
-export default app
+module.exports = app
