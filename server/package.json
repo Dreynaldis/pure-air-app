@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "rimraf dist && tsc",
-    "start": "nodemon src/index.ts",
+    "start": "npx nodemon src/index.ts",
     "ts.check": "tsc --project tsconfig.json",
     "add-build" : "git add dist",
     "tsc": "tsc",
@@ -49,5 +49,10 @@
     "singleQuote": true,
     "trailingComma": "all",
     "arrowParens": "always"
-  }
+  },
+  "pre-commit": [
+    "ts.check",
+    "build",
+    "add-build"
+  ]
 }
