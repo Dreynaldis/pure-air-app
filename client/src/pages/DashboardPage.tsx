@@ -13,6 +13,8 @@ import { Bar } from "react-chartjs-2"
 import { getTingkat } from "../utils/tools"
 import Modal from "../component/Modal"
 import { handleToastError, handleToastSuccess } from "../utils/toast"
+import Cookies from "js-cookie"
+import { useNavigate } from "react-router-dom"
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
@@ -42,13 +44,14 @@ const DashboardPage = () => {
     const [modalType, setModalType] = useState<"create" | "edit" | "delete">("create")
     const [qualityData, setQualityData] = useState<QualityData[]>([])
     const [selectedId, setSelectedId] = useState<number | null>(null)
-    const [currentEditData, setCurrentEditData] = useState<any |null>(null)
+    const [currentEditData, setCurrentEditData] = useState<any | null>(null)
+    const [searchId, setSearchId] = useState<string>("")
 
     useEffect(() => {
         fetchData()
 
     }, [])
-
+    const navigate = useNavigate()
     const fetchData = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/quality`)
@@ -93,12 +96,20 @@ const DashboardPage = () => {
         }
     }
     
-    const checkExistingDaerah = (daerah: string) => {
-        if (barChartData) {
+    const checkExistingDaerah = (daerah: string, type: 'create' | 'edit') => {
+        
+        if (barChartData && type === 'create') {
             return barChartData.labels.some((item) => {
               return  item.toLowerCase() === daerah.toLowerCase()
             })
-        } return false
+        } else if (barChartData && type === "edit") {
+            return barChartData.labels.some((item, index) => {
+                return barChartData.labels.some((item, index) => {
+                    const dataItem = barChartData.datasets[0].data[index]
+                    return item.toLowerCase() === daerah.toLowerCase() && dataItem !== selectedId
+                })
+            })
+        }
     }
 
     const options = {
@@ -136,8 +147,14 @@ const DashboardPage = () => {
         }
         
     }
-
+    const handleSearchById = () => {
+        if (searchId.trim()) {
+            navigate(`/details/${searchId}`)
+        }
+    }
     const handleCreateSubmit = async (newData: { daerah: string, value: number, tingkat: string }) => {
+        let token = Cookies.get('token')
+
         if (checkExistingDaerah(newData.daerah)) {
             handleToastError('Daerah already exists!')
         } else {
@@ -146,42 +163,69 @@ const DashboardPage = () => {
                     daerah: newData.daerah,
                     value: newData.value,
                     tingkat: newData.tingkat
-                })
+                },{headers: {'authorization' : token}})
     
                 fetchData()
                 handleToastSuccess('Created new data Sucess!!')
                 setShowModal(false)
-            } catch (error) {
-                console.error('Error posting data', error)
-                handleToastError('Something went wrong, please try again later')
+            } catch (error: any) {
+                if (error.response.data.message === "Token is required" || error.response.data.message === "Invalid token") {
+                    console.error('Token is required')
+                    handleToastError('Please Login again')
+                    navigate('/login')
+                } else {
+                    console.error('Error posting data', error)
+                    handleToastError('Something went wrong, please try again later')
+                }
+                
             }
         }
 
     }
 
-    const handleEditSubmit = async (updatedData: {daerah: string, values: number}) => {
-        try {
-            await axios.put(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`, updatedData)
-            setSelectedId(null)
-            setCurrentEditData(null)
-            fetchData()
-            setShowModal(false)
-            handleToastSuccess('Data updated successfully')
-        } catch (error) {
+    const handleEditSubmit = async (updatedData: { daerah: string, values: number }) => {
+        
+        if (checkExistingDaerah(updatedData.daerah, "edit")) {
+                handleToastError('Daerah already exists!')
+        } else {
+            try {
+        let token = Cookies.get('token')
+
+        await axios.put(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`, updatedData,{headers: {'authorization' : token}})
+        setSelectedId(null)
+        setCurrentEditData(null)
+        fetchData()
+        setShowModal(false)
+        handleToastSuccess('Data updated successfully')
+    } catch (error: any) {
+        if (error.response.data.message === "Token is required" || error.response.data.message === "Invalid token") {
+            console.error("Token is required")
+            handleToastError("Please login")
+            navigate("/login")
+        } else {
             console.error(`Error updating data: ${selectedId}`, error)
             handleToastError('Failed to update data, please try again')
         }
     }
+            }
+            }
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`)
+            let token = Cookies.get('token')
+            await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/quality/${selectedId}`, {headers: {'authorization' : token}})
             fetchData()
             setShowModal(false)
             handleToastSuccess("Data deleted Successfully")
-        } catch (error) {
-            console.error("Error Deleting data", error)
-            handleToastError('Failed to delete data, please try again')
+        } catch (error: any) {
+            if (error.response.data.message === "Token is required" || error.response.data.message === "Invalid token") {
+                console.error('Token is required')
+                handleToastError('Please Login again')
+                navigate('/login')
+            } else {
+                console.error("Error Deleting data", error)
+                handleToastError('Failed to delete data, please try again')
+            }
         }
     }
 
@@ -214,13 +258,21 @@ const DashboardPage = () => {
             </div>
           </div>
           <div className="container mx-auto p-6">
-      {/* Button to open modal */}
-      <button
-        onClick={() => handleOpenModal("create")}
-        className="bg-blue-700 text-white px-5 py-2.5 rounded-lg"
+          <input
+          type="number"
+                  placeholder="Search by ID"
+                  value={searchId}
+                  onChange={(e) => setSearchId(e.target.value)}
+          className="mb-4 p-2 border rounded hide-arrow text-gray-700"
+              />
+              <button
+        onClick={handleSearchById}
+        className="bg-green-700 text-white px-5 py-2.5 rounded-lg ml-4"
       >
-        Add New Data
+        Search data by id
       </button>
+      {/* Button to open modal */}
+      
               <Modal
                   modalType={modalType}
                   isOpen={showModal}
@@ -230,6 +282,12 @@ const DashboardPage = () => {
               />
       
           </div>
+          <button
+        onClick={() => handleOpenModal("create")}
+        className="bg-blue-700 text-white px-5 py-2.5 rounded-lg"
+      >
+        Add New Data
+      </button>
           {qualityData.length>0 ? (
               <div className="mt-6 w-4/5 border rounded-lg p-4 bg-g1">
               <h2 className="text-xl mb-4">Data List</h2>

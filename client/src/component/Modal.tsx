@@ -35,7 +35,10 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
       formik.resetForm
     },
   });
-
+  const handleClose = () => {
+    formik.resetForm()
+    onClose()
+  }
   return (
     <div
       className={`${
@@ -51,7 +54,7 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
             {modalType === 'edit' && `Edit Data for ID: ${initialData?.id}`}
             {modalType === 'delete' && `Confirm Delete for ID: ${initialData?.id}`}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-900 text-xl">
+          <button onClick={handleClose} className="text-gray-400 hover:text-gray-900 text-xl">
             &times;
           </button>
         </div>
@@ -70,9 +73,10 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
                         type="text"
                         id="daerah"
                         name="daerah"
-                        value={modalType === "create" ? formik.values.daerah : initialData?.daerah}
+                        value={formik.values.daerah}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
+                        placeholder={modalType === 'edit' ? initialData?.daerah : ""}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700"
                       />
                       {formik.touched.daerah && formik.errors.daerah ? (
@@ -87,9 +91,10 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
                         type="number"
                         id="value"
                         name="value"
-                        value={modalType === "create" ? formik.values.value : initialData?.value}
+                        value={formik.values.value}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
+                        placeholder={modalType === 'edit' ? initialData?.value : ""}
                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md text-gray-700"
                       />
                       {formik.touched.value && formik.errors.value ? (
@@ -109,7 +114,7 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
                       </button>
                       <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300"
                 >
                   Cancel
@@ -136,7 +141,7 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
                 )}
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300"
                 >
                   Cancel
@@ -154,7 +159,7 @@ const Modal: React.FC<ModalProps> = ({ modalType, isOpen, onClose, onSubmit, ini
             </button>
             <button
         type="button"
-        onClick={onClose}
+        onClick={handleClose}
         className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300"
       >
         Cancel

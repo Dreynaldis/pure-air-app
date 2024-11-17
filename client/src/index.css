@@ -24,3 +24,12 @@
     background: linear-gradient(#334679, #0c1838);
   }
 }
+
+.hide-arrow input[type=number]::-webkit-inner-spin-button, 
+.hide-arrow input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important; 
+}
+

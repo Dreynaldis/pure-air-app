@@ -31,8 +31,10 @@ export const verifyToken = (token: string) => {
 };
 
 export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // Mengambil token dari header Authorization
+  const token = req.headers['authorization'];
+  // console.log('THIS IS AUTH HEADER :', authHeader);
+  
+  // const token = authHeader && authHeader.split(' ')[1]; // Mengambil token dari header Authorization
 
   if (!token) {
     return res
@@ -41,6 +43,7 @@ export const authenticateToken = (req, res, next) => {
   }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    console.log('THIS IS TOKEN IN VERIFY', token)
     if (err) {
       return res.status(403).json({status: 'FAILED', message: 'Invalid token'}); // Jika token tidak valid
     }

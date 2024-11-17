@@ -116,3 +116,14 @@ export const refreshToken = async (req: Request, res: Response) => {
     return responseJSON(req, res, error, true);
   }
 };
+
+export const check = async (req: Request, res: Response) => {
+  try {
+    console.log('inside the check function')
+    return responseJSON(req, res, null)
+    
+  } catch (error) {
+    console.error('Error in checking', error)
+    return responseJSON(req, res, error, true)
+  }
+}

@@ -4,7 +4,7 @@ import {
   getUserByIdRpo,
   createUserRpo,
   updateUserRpo,
-  deleteUserRpo,
+  deleteUserRpo
 } from './user.repository';
 
 export const getAllUsersSvc = async () => {

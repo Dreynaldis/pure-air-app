@@ -86,3 +86,4 @@ export const destroy = async (req: Request, res: Response) => {
     return responseJSON(req, res, error, true);
   }
 };
+

@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'; // Ensure this import is here fo
 import Navbar from './component/Navbar'; // Adjust the import path based on your project structure
 import LoginPage from './pages/LoginPage'; // Adjust the path based on your project structure
 import DashboardPage from './pages/DashboardPage'; // Adjust the path based on your project structure
+import DetailsPage from './pages/DetailsPage';
 
 const App: React.FC = () => {
   return (
@@ -14,6 +15,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/details/:id" element={<DetailsPage />} />
         </Routes>
     </Router>
   );
