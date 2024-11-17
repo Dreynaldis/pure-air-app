@@ -2,9 +2,11 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-
 import router from './routes';
 import sequelize from './db/config';
+
+require('dotenv').config()
+
 const {neon} = require('@neondatabase/serverless')
 
 const app = express().disable('x-powered-by');
@@ -15,7 +17,13 @@ app.use(express.json({limit: '100mb'}));
 app.use(express.urlencoded({extended: true, limit: '100mb'}));
 
 app.use('/api/v1', router);
-
+app.get('/', async (_, res) => {
+  const sql = neon(`${process.env.DATABASE_URL}`)
+  const response = await sql`SELECT version()`
+  const { version } = response[0]
+  
+  res.json({ version })
+})
 // Check database connection
 try {
   sequelize.authenticate();
@@ -24,13 +32,6 @@ try {
   console.error('Unable to connect to the database:', error);
 }
 
-app.get('/', async (_, res) => {
-  const sql = neon(`${process.env.DATABASE_URL}`)
-  const response = await sql`SELECT version()`
-  const { version } = response[0]
-  
-  res.json({ version })
-})
 
 const port = process.env.PORT || 3000;
 app.listen(port);

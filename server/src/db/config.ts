@@ -1,4 +1,5 @@
-import {Sequelize} from 'sequelize';
+import { Sequelize } from 'sequelize';
+require('dotenv').config()
 
 // const sequelize = new Sequelize(
 //   process.env.DB_NAME,
@@ -27,8 +28,12 @@ const sequelize = new Sequelize(
     pool: { max: 5 },
     logging: `${process.env.ENV}` === 'production' ? false : console.log,
     dialect: 'postgres',
-    dialectOptions: { application_name: process.env.APP_NAME },
+    dialectOptions: { application_name: process.env.APP_NAME, ssl: {
+      require: true,
+      rejectUnauthorized: false
+    } },
     timezone: '+07:00',
+    
   },
 );
 
