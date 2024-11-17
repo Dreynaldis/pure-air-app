@@ -1,0 +1,20 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "server/src/index.ts",
+        "use": "@vercel/node"
+      }
+    ],
+    "env": {
+      "DB_HOST": "ep-shy-king-a1pehp4l.ap-southeast-1.aws.neon.tech",
+      "DB_NAME": "Air Quality",
+      "DB_USER": "Air Quality_owner",
+      "DB_PASS": "ujCTU8yHcN7J",
+      "DB_PORT": "5432",
+      "APP_NAME": "PURE-AIR",
+      "ENV": "production",
+      "PORT": "3000"
+    }
+  }
+  
