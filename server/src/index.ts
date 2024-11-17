@@ -2,8 +2,9 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import compression from 'compression';
-import router from '../src/routes';
-import sequelize from '../src/db/config';
+import router from './routes';
+import sequelize from './db/config';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 
 require('dotenv').config()
 
@@ -37,4 +38,6 @@ const port = process.env.PORT || 3000;
 app.listen(port);
 console.log(`${process.env.APP_NAME} running on port ${port}`);
 
-module.exports = app
+export default (req: VercelRequest, res: VercelResponse) => {
+  app(req,res)
+}
