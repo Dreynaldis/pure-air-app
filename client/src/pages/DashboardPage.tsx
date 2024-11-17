@@ -103,7 +103,7 @@ const DashboardPage = () => {
               return  item.toLowerCase() === daerah.toLowerCase()
             })
         } else if (barChartData && type === "edit") {
-            return barChartData.labels.some((item, index) => {
+            return barChartData.labels.some(() => {
                 return barChartData.labels.some((item, index) => {
                     const dataItem = barChartData.datasets[0].data[index]
                     return item.toLowerCase() === daerah.toLowerCase() && dataItem !== selectedId
@@ -134,7 +134,7 @@ const DashboardPage = () => {
         setShowModal(false)
     }
 
-    const handleOpenModal = (type: "create" | "edit" | "delete", item: QualityData) => {
+    const handleOpenModal = (type: "create" | "edit" | "delete", item: QualityData | null) => {
         setModalType(type)
         setShowModal(true)
 
@@ -155,7 +155,7 @@ const DashboardPage = () => {
     const handleCreateSubmit = async (newData: { daerah: string, value: number, tingkat: string }) => {
         let token = Cookies.get('token')
 
-        if (checkExistingDaerah(newData.daerah)) {
+        if (checkExistingDaerah(newData.daerah, "create")) {
             handleToastError('Daerah already exists!')
         } else {
             try {
@@ -283,7 +283,7 @@ const DashboardPage = () => {
       
           </div>
           <button
-        onClick={() => handleOpenModal("create")}
+        onClick={() => handleOpenModal("create", null)}
         className="bg-blue-700 text-white px-5 py-2.5 rounded-lg"
       >
         Add New Data
