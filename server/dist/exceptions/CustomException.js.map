@@ -1,0 +1,1 @@
+{"version":3,"file":"CustomException.js","sourceRoot":"","sources":["../../src/exceptions/CustomException.ts"],"names":[],"mappings":";;;AAAA,2DAAsD;AAQtD,MAAa,eAAe;IAG1B,YACE,MAAW,qCAAiB,CAAC,gBAAgB,EAC7C,SAAqB;QAErB,IAAI,CAAC,GAAG,GAAG,GAAG,CAAC;QACf,IAAI,CAAC,SAAS,GAAG,SAAS,CAAC;IAC7B,CAAC;CACF;AAVD,0CAUC"}
