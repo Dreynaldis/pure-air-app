@@ -1,6 +1,5 @@
 import {Router} from 'express';
 import userRouter from '../features/users/user.router';
-import {serviceMiddleware} from '../middleware/middleware';
 import {authenticateToken} from '../middleware/jwt';
 import authRouter from '../features/auth/auth.router';
 import airQualityRouter from '../features/quality/quality.router';

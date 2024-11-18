@@ -27,7 +27,7 @@ app.use((0, compression_1.default)({ threshold: 0 }));
 app.use(express_1.default.json({ limit: '100mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '100mb' }));
 app.use('/api/v1', routes_1.default);
-app.get('/', (_, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.get('/api', (_, res) => __awaiter(void 0, void 0, void 0, function* () {
     const sql = neon(`${process.env.DATABASE_URL}`);
     const response = yield sql `SELECT version()`;
     const { version } = response[0];

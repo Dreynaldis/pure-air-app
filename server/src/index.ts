@@ -18,7 +18,7 @@ app.use(express.json({limit: '100mb'}));
 app.use(express.urlencoded({extended: true, limit: '100mb'}));
 
 app.use('/api/v1', router);
-app.get('/', async (_, res) => {
+app.get('/api', async (_, res) => {
   const sql = neon(`${process.env.DATABASE_URL}`)
   const response = await sql`SELECT version()`
   const { version } = response[0]

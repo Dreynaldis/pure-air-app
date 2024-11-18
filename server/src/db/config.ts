@@ -28,10 +28,13 @@ const sequelize = new Sequelize(
     pool: { max: 5 },
     logging: `${process.env.ENV}` === 'production' ? false : console.log,
     dialect: 'postgres',
-    dialectOptions: { application_name: process.env.APP_NAME, ssl: {
+    dialectOptions: {
+      application_name: process.env.APP_NAME,
+      ssl: {
       require: true,
       rejectUnauthorized: false
-    } },
+      }
+    },
     timezone: '+07:00',
     
   },
